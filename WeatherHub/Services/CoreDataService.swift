@@ -3,7 +3,7 @@ import Foundation
 import CoreData
 
 
-protocol FavouriteRepositoryProtocol {
+protocol CoreDataServiceProtocol {
     func fetchFavourites() -> [FavouriteLocation]
     func addFavourite(cityName: String, country: String, latitude: Double, longitude: Double)
     func deleteFavourite(_ location: FavouriteLocation)
@@ -11,7 +11,7 @@ protocol FavouriteRepositoryProtocol {
 }
 
 
-final class CoreDataService: FavouriteRepositoryProtocol {
+final class CoreDataService: CoreDataServiceProtocol {
 
     private let viewContext: NSManagedObjectContext
 

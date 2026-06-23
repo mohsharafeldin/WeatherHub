@@ -11,12 +11,12 @@ final class WeatherViewModel: ObservableObject {
     @Published var errorMessage: String?
 
 
-    private let weatherService: WeatherServiceProtocol
+    private let weatherRepository: WeatherRepositoryProtocol
     private var cancellables = Set<AnyCancellable>()
 
 
-    init(weatherService: WeatherServiceProtocol = NetworkService()) {
-        self.weatherService = weatherService
+    init(weatherRepository: WeatherRepositoryProtocol = WeatherRepository()) {
+        self.weatherRepository = weatherRepository
     }
 
 
@@ -97,7 +97,7 @@ final class WeatherViewModel: ObservableObject {
         isLoading = true
         errorMessage = nil
 
-        weatherService.fetchWeather(query: query)
+        weatherRepository.fetchWeather(query: query)
             .receive(on: DispatchQueue.main)
             .sink(receiveCompletion: { [weak self] completion in
                 self?.isLoading = false

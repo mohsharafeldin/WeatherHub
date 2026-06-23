@@ -17,11 +17,11 @@ final class SearchViewModel: ObservableObject {
     @Published var locationToDelete: FavouriteLocation?
 
 
-    private let favouriteRepository: FavouriteRepositoryProtocol
+    private let favouriteRepository: FavouriteLocationRepositoryProtocol
     private var cancellables = Set<AnyCancellable>()
 
 
-    init(favouriteRepository: FavouriteRepositoryProtocol = CoreDataService()) {
+    init(favouriteRepository: FavouriteLocationRepositoryProtocol = FavouriteLocationRepository()) {
         self.favouriteRepository = favouriteRepository
         setupSearchSubscription()
         loadFavourites()

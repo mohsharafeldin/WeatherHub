@@ -30,12 +30,12 @@ enum NetworkError: LocalizedError {
 }
 
 
-protocol WeatherServiceProtocol {
+protocol WeatherNetworkServiceProtocol {
     func fetchWeather(query: String) -> AnyPublisher<WeatherResponse, NetworkError>
 }
 
 
-final class NetworkService: WeatherServiceProtocol {
+final class NetworkService: WeatherNetworkServiceProtocol {
 
     private let session: URLSession
 
