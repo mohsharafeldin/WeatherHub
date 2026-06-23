@@ -13,15 +13,18 @@ struct PersistenceController {
     static var preview: PersistenceController = {
         let result = PersistenceController(inMemory: true)
         let viewContext = result.container.viewContext
-        for _ in 0..<10 {
-            let newItem = Item(context: viewContext)
-            newItem.timestamp = Date()
+        for i in 0..<5 {
+            let favourite = FavouriteLocation(context: viewContext)
+            favourite.id = UUID()
+            favourite.cityName = ["Cairo", "London", "Tokyo", "New York", "Dubai"][i]
+            favourite.country = ["Egypt", "United Kingdom", "Japan", "United States", "UAE"][i]
+            favourite.latitude = [30.04, 51.51, 35.68, 40.71, 25.20][i]
+            favourite.longitude = [31.24, -0.13, 139.69, -74.01, 55.27][i]
+            favourite.addedAt = Date().addingTimeInterval(Double(-i) * 3600)
         }
         do {
             try viewContext.save()
         } catch {
-            // Replace this implementation with code to handle the error appropriately.
-            // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
             let nsError = error as NSError
             fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
         }
@@ -37,9 +40,6 @@ struct PersistenceController {
         }
         container.loadPersistentStores(completionHandler: { (storeDescription, error) in
             if let error = error as NSError? {
-                // Replace this implementation with code to handle the error appropriately.
-                // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
-
                 /*
                  Typical reasons for an error here include:
                  * The parent directory does not exist, cannot be created, or disallows writing.

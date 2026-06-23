@@ -1,0 +1,66 @@
+// GlassmorphicBackground.swift
+// WeatherHub
+//
+// Created by WeatherHub on 2024.
+//
+
+import SwiftUI
+
+/// A `ViewModifier` that applies a glassmorphism card style using `ultraThinMaterial`,
+/// rounded corners, and a subtle drop shadow.
+struct GlassmorphicCard: ViewModifier {
+    func body(content: Content) -> some View {
+        content
+            .background(.ultraThinMaterial)
+            .cornerRadius(16)
+            .shadow(color: .black.opacity(0.1), radius: 10, x: 0, y: 5)
+    }
+}
+
+// MARK: - View Extension
+
+extension View {
+    /// Applies the glassmorphic card style to the view.
+    ///
+    /// Usage:
+    /// ```swift
+    /// Text("Hello")
+    ///     .padding()
+    ///     .glassmorphic()
+    /// ```
+    func glassmorphic() -> some View {
+        modifier(GlassmorphicCard())
+    }
+}
+
+// MARK: - Preview
+
+struct GlassmorphicCard_Previews: PreviewProvider {
+    static var previews: some View {
+        ZStack {
+            LinearGradient(
+                colors: [.blue, .purple],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            .ignoresSafeArea()
+
+            VStack(spacing: 20) {
+                Text("Glassmorphic Card")
+                    .font(.headline)
+                    .foregroundColor(.white)
+                    .padding()
+                    .frame(maxWidth: .infinity)
+                    .glassmorphic()
+
+                Text("Another Card")
+                    .font(.body)
+                    .foregroundColor(.white)
+                    .padding()
+                    .frame(maxWidth: .infinity)
+                    .glassmorphic()
+            }
+            .padding()
+        }
+    }
+}

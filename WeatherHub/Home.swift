@@ -8,8 +8,28 @@
 import SwiftUI
 
 struct Home: View {
+    @State private var selectedTab = 0
+    
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        TabView(selection: $selectedTab) {
+            NavigationView {
+                WeatherDetailView(query: "30.0444,31.2357")
+            }
+            .navigationViewStyle(.stack)
+            .tabItem {
+                Image(systemName: "cloud.sun.fill")
+                Text("Weather")
+            }
+            .tag(0)
+            
+            SavedLocationsView()
+                .tabItem {
+                    Image(systemName: "mappin.and.ellipse")
+                    Text("Locations")
+                }
+                .tag(1)
+        }
+        .accentColor(.white)
     }
 }
 
