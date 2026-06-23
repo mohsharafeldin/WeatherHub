@@ -13,6 +13,7 @@ enum NetworkError: LocalizedError {
     case invalidResponse
     case httpError(statusCode: Int)
     case decodingError(Error)
+    case network(Error)
     case unknown(Error)
 
     var errorDescription: String? {
@@ -25,6 +26,8 @@ enum NetworkError: LocalizedError {
             return "Server returned HTTP \(statusCode)."
         case .decodingError(let error):
             return "Failed to decode response: \(error.localizedDescription)"
+        case .network(let error):
+            return "Network error: \(error.localizedDescription)"
         case .unknown(let error):
             return error.localizedDescription
         }
@@ -34,7 +37,7 @@ enum NetworkError: LocalizedError {
 // MARK: - Protocol
 
 protocol WeatherServiceProtocol {
-    func fetchWeather(query: String) -> AnyPublisher<WeatherResponse, Error>
+    func fetchWeather(query: String) -> AnyPublisher<WeatherResponse, NetworkError>
 }
 
 // MARK: - Implementation
@@ -47,7 +50,7 @@ final class NetworkService: WeatherServiceProtocol {
         self.session = session
     }
 
-    func fetchWeather(query: String) -> AnyPublisher<WeatherResponse, Error> {
+    func fetchWeather(query: String) -> AnyPublisher<WeatherResponse, NetworkError> {
         guard var components = URLComponents(string: Constants.baseURL + Constants.forecastEndpoint) else {
             return Fail(error: NetworkError.invalidURL)
                 .eraseToAnyPublisher()
@@ -77,16 +80,18 @@ final class NetworkService: WeatherServiceProtocol {
                 return data
             }
             .decode(type: WeatherResponse.self, decoder: JSONDecoder())
-            .mapError { error -> Error in
+            .mapError { error -> NetworkError in
                 if error is DecodingError {
                     return NetworkError.decodingError(error)
+                }
+                if let urlError = error as? URLError {
+                    return NetworkError.network(urlError)
                 }
                 if let networkError = error as? NetworkError {
                     return networkError
                 }
                 return NetworkError.unknown(error)
             }
-            .receive(on: DispatchQueue.main)
             .eraseToAnyPublisher()
     }
 }

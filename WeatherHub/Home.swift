@@ -9,16 +9,17 @@ import SwiftUI
 
 struct Home: View {
     @State private var selectedTab = 0
+    @StateObject private var locationManager = LocationManager()
     
     var body: some View {
         TabView(selection: $selectedTab) {
             NavigationView {
-                WeatherDetailView(query: "30.0444,31.2357")
+                currentLocationWeatherView
             }
             .navigationViewStyle(.stack)
             .tabItem {
-                Image(systemName: "cloud.sun.fill")
-                Text("Weather")
+                Image(systemName: "location.fill")
+                Text("My Location")
             }
             .tag(0)
             
@@ -30,6 +31,88 @@ struct Home: View {
                 .tag(1)
         }
         .accentColor(.white)
+        .onAppear {
+            locationManager.requestLocation()
+        }
+    }
+    
+    // MARK: - Current Location Weather
+    
+    @ViewBuilder
+    private var currentLocationWeatherView: some View {
+        if let query = locationManager.coordinateQuery {
+            // Location available — show weather
+            WeatherDetailView(query: query)
+        } else if let error = locationManager.locationError {
+            // Permission denied or error
+            locationStatusView(
+                icon: "location.slash.fill",
+                title: "Location Unavailable",
+                message: error,
+                showSettingsButton: locationManager.authorizationStatus == .denied
+            )
+        } else {
+            // Waiting for location
+            locationStatusView(
+                icon: "location.circle",
+                title: "Finding Your Location…",
+                message: "WeatherHub needs your location to show local weather.",
+                showSettingsButton: false
+            )
+        }
+    }
+    
+    private func locationStatusView(icon: String, title: String, message: String, showSettingsButton: Bool) -> some View {
+        ZStack {
+            LinearGradient(
+                colors: TimeOfDayHelper.backgroundGradient(for: TimeOfDayHelper.current()),
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            .ignoresSafeArea()
+            
+            VStack(spacing: 20) {
+                Image(systemName: icon)
+                    .font(.system(size: 56))
+                    .foregroundColor(.white.opacity(0.7))
+                
+                Text(title)
+                    .font(.title2.weight(.semibold))
+                    .foregroundColor(.white)
+                
+                Text(message)
+                    .font(.subheadline)
+                    .foregroundColor(.white.opacity(0.7))
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 40)
+                
+                if showSettingsButton {
+                    Button(action: openAppSettings) {
+                        HStack(spacing: 8) {
+                            Image(systemName: "gear")
+                            Text("Open Settings")
+                        }
+                        .font(.body.weight(.medium))
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 32)
+                        .padding(.vertical, 12)
+                        .background(
+                            Capsule()
+                                .fill(.ultraThinMaterial)
+                        )
+                    }
+                } else if !locationManager.isDetermined {
+                    ProgressView()
+                        .tint(.white)
+                        .scaleEffect(1.3)
+                }
+            }
+        }
+    }
+    
+    private func openAppSettings() {
+        guard let url = URL(string: UIApplication.openSettingsURLString) else { return }
+        UIApplication.shared.open(url)
     }
 }
 
