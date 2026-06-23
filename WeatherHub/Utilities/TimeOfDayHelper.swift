@@ -1,31 +1,20 @@
-//
-//  TimeOfDayHelper.swift
-//  WeatherHub
-//
 
 import SwiftUI
 
-// MARK: - TimeOfDay Enum
 
 enum TimeOfDay {
     case morning
     case evening
 }
 
-// MARK: - TimeOfDayHelper
 
 enum TimeOfDayHelper {
 
-    /// Determines the current time of day based on the device clock.
-    /// Morning is defined as 5:00 AM – 5:59 PM; evening is 6:00 PM – 4:59 AM.
     static func current() -> TimeOfDay {
         let hour = Calendar.current.component(.hour, from: Date())
         return (5 <= hour && hour < 18) ? .morning : .evening
     }
 
-    /// Returns a two-stop linear gradient suitable for the given time of day.
-    /// - Morning: sky blue → gold
-    /// - Evening: dark navy → deep teal
     static func backgroundGradient(for timeOfDay: TimeOfDay) -> [Color] {
         switch timeOfDay {
         case .morning:
@@ -41,7 +30,6 @@ enum TimeOfDayHelper {
         }
     }
 
-    /// Primary text color for the given time of day.
     static func textColor(for timeOfDay: TimeOfDay) -> Color {
         switch timeOfDay {
         case .morning:
@@ -51,7 +39,6 @@ enum TimeOfDayHelper {
         }
     }
 
-    /// Secondary (dimmed) text color for the given time of day.
     static func secondaryTextColor(for timeOfDay: TimeOfDay) -> Color {
         switch timeOfDay {
         case .morning:
@@ -61,4 +48,3 @@ enum TimeOfDayHelper {
         }
     }
 }
-

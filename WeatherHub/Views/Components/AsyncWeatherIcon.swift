@@ -1,26 +1,10 @@
-// AsyncWeatherIcon.swift
-// WeatherHub
-//
-// Created by WeatherHub on 2024.
-//
 
 import SwiftUI
 
-/// A reusable view that asynchronously loads and displays a weather condition icon from a URL.
-///
-/// The WeatherAPI returns icon URLs like `"//cdn.weatherapi.com/weather/64x64/day/113.png"`.
-/// Callers should prepend `"https:"` before constructing the URL.
-///
-/// Usage:
-/// ```swift
-/// AsyncWeatherIcon(iconURL: viewModel.conditionIconURL, size: 48)
-/// ```
 struct AsyncWeatherIcon: View {
 
-    /// The URL of the weather icon to load. `nil` displays a fallback icon.
     let iconURL: URL?
 
-    /// The width and height of the icon. Defaults to 40pt.
     var size: CGFloat = 40
 
     var body: some View {
@@ -62,7 +46,6 @@ struct AsyncWeatherIcon: View {
     }
 }
 
-// MARK: - Preview
 
 struct AsyncWeatherIcon_Previews: PreviewProvider {
     static var previews: some View {

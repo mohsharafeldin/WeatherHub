@@ -1,28 +1,21 @@
-//
-//  WeatherDetailView.swift
-//  WeatherHub
-//
-//  Created by mohamed sharaf on 23/06/2026.
-//
 
 import SwiftUI
 
 struct WeatherDetailView: View {
     @StateObject private var viewModel = WeatherViewModel()
     let query: String
-    
+
     @State private var contentOpacity: Double = 0
-    
+
     var body: some View {
         ZStack {
-            // Dynamic gradient background filling entire screen
             LinearGradient(
                 colors: viewModel.backgroundColors,
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
             .ignoresSafeArea()
-            
+
             if viewModel.isLoading {
                 VStack(spacing: 16) {
                     ProgressView()
@@ -58,25 +51,24 @@ struct WeatherDetailView: View {
             viewModel.fetchWeather(for: query)
         }
     }
-    
-    // MARK: - Error View
-    
+
+
     private func errorView(message: String) -> some View {
         VStack(spacing: 20) {
             Image(systemName: "exclamationmark.icloud.fill")
                 .font(.system(size: 56))
                 .foregroundColor(viewModel.textColor.opacity(0.6))
-            
+
             Text("Something went wrong")
                 .font(.title2.weight(.semibold))
                 .foregroundColor(viewModel.textColor)
-            
+
             Text(message)
                 .font(.subheadline)
                 .foregroundColor(viewModel.secondaryTextColor)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 40)
-            
+
             Button(action: {
                 viewModel.fetchWeather(for: query)
             }) {
@@ -95,28 +87,27 @@ struct WeatherDetailView: View {
             }
         }
     }
-    
-    // MARK: - Top Section
-    
+
+
     private var topSection: some View {
         VStack(spacing: 8) {
             Text(viewModel.locationName)
                 .font(.title.weight(.medium))
                 .foregroundColor(viewModel.textColor)
-            
+
             Text(viewModel.currentTemp)
                 .font(.system(size: 72, weight: .thin, design: .rounded))
                 .foregroundColor(viewModel.textColor)
                 .shadow(color: .black.opacity(0.1), radius: 4, x: 0, y: 2)
-            
+
             HStack(spacing: 6) {
                 AsyncWeatherIcon(iconURL: viewModel.conditionIconURL, size: 36)
-                
+
                 Text(viewModel.conditionText)
                     .font(.title3.weight(.medium))
                     .foregroundColor(viewModel.textColor)
             }
-            
+
             HStack(spacing: 16) {
                 Label {
                     Text(viewModel.highTemp)
@@ -126,7 +117,7 @@ struct WeatherDetailView: View {
                         .font(.body.weight(.semibold))
                 }
                 .foregroundColor(viewModel.textColor)
-                
+
                 Label {
                     Text(viewModel.lowTemp)
                         .font(.body.weight(.medium))
@@ -140,12 +131,10 @@ struct WeatherDetailView: View {
         }
         .padding(.vertical, 16)
     }
-    
-    // MARK: - Forecast Section
-    
+
+
     private var forecastSection: some View {
         VStack(alignment: .leading, spacing: 0) {
-            // Header
             HStack(spacing: 6) {
                 Image(systemName: "calendar")
                     .font(.caption.weight(.semibold))
@@ -157,12 +146,11 @@ struct WeatherDetailView: View {
             .padding(.horizontal, 16)
             .padding(.top, 14)
             .padding(.bottom, 10)
-            
+
             Divider()
                 .background(viewModel.textColor.opacity(0.2))
                 .padding(.horizontal, 16)
-            
-            // Forecast Rows
+
             VStack(spacing: 0) {
                 ForEach(Array(viewModel.forecastDays.enumerated()), id: \.element.id) { index, day in
                     let iconURLString = day.day.condition.icon.hasPrefix("//")
@@ -172,7 +160,7 @@ struct WeatherDetailView: View {
                     let lowTemp = "\(Int(day.day.mintempC))°"
                     let highTemp = "\(Int(day.day.maxtempC))°"
                     let label = viewModel.dayLabel(for: index)
-                    
+
                     NavigationLink(destination: HourlyForecastView(forecastDay: day, dayLabel: label)) {
                         ForecastRowView(
                             dayLabel: label,
@@ -184,7 +172,7 @@ struct WeatherDetailView: View {
                         .padding(.horizontal, 16)
                         .padding(.vertical, 10)
                     }
-                    
+
                     if index < viewModel.forecastDays.count - 1 {
                         Divider()
                             .background(viewModel.textColor.opacity(0.15))
@@ -196,9 +184,8 @@ struct WeatherDetailView: View {
         }
         .glassmorphic()
     }
-    
-    // MARK: - Details Grid
-    
+
+
     private var detailsGrid: some View {
         LazyVGrid(
             columns: [
@@ -213,21 +200,21 @@ struct WeatherDetailView: View {
                 systemIcon: "eye.fill",
                 textColor: viewModel.textColor
             )
-            
+
             WeatherInfoCard(
                 title: "Humidity",
                 value: viewModel.humidity,
                 systemIcon: "humidity.fill",
                 textColor: viewModel.textColor
             )
-            
+
             WeatherInfoCard(
                 title: "Feels Like",
                 value: viewModel.feelsLike,
                 systemIcon: "thermometer.medium",
                 textColor: viewModel.textColor
             )
-            
+
             WeatherInfoCard(
                 title: "Pressure",
                 value: viewModel.pressure,
@@ -238,7 +225,6 @@ struct WeatherDetailView: View {
     }
 }
 
-// MARK: - Preview
 
 struct WeatherDetailView_Previews: PreviewProvider {
     static var previews: some View {

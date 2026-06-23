@@ -1,53 +1,44 @@
-//
-//  HourlyForecastView.swift
-//  WeatherHub
-//
-//  Created by mohamed sharaf on 23/06/2026.
-//
 
 import SwiftUI
 
 struct HourlyForecastView: View {
     @StateObject var viewModel: HourlyForecastViewModel
-    
+
     @State private var contentOpacity: Double = 0
-    
+
     init(forecastDay: ForecastDay, dayLabel: String) {
         _viewModel = StateObject(wrappedValue: HourlyForecastViewModel(
             forecastDay: forecastDay,
             dayLabel: dayLabel
         ))
     }
-    
+
     private let columns = [
         GridItem(.adaptive(minimum: 72), spacing: 12)
     ]
-    
+
     var body: some View {
         ZStack {
-            // Dynamic gradient background
             LinearGradient(
                 colors: viewModel.backgroundColors,
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
             .ignoresSafeArea()
-            
+
             ScrollView(showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 20) {
-                    // Header
                     VStack(alignment: .leading, spacing: 6) {
                         Text(viewModel.dayLabel)
                             .font(.title.weight(.semibold))
                             .foregroundColor(viewModel.textColor)
-                        
+
                         Text(viewModel.dateString)
                             .font(.subheadline)
                             .foregroundColor(viewModel.secondaryTextColor)
                     }
                     .padding(.horizontal, 4)
-                    
-                    // Hourly Grid
+
                     VStack(alignment: .leading, spacing: 12) {
                         HStack(spacing: 6) {
                             Image(systemName: "clock")
@@ -59,11 +50,11 @@ struct HourlyForecastView: View {
                         .foregroundColor(viewModel.secondaryTextColor)
                         .padding(.horizontal, 16)
                         .padding(.top, 14)
-                        
+
                         Divider()
                             .background(viewModel.textColor.opacity(0.2))
                             .padding(.horizontal, 16)
-                        
+
                         LazyVGrid(columns: columns, spacing: 12) {
                             ForEach(viewModel.hours) { hour in
                                 HourlyCell(
@@ -95,7 +86,6 @@ struct HourlyForecastView: View {
     }
 }
 
-// MARK: - Preview
 
 struct HourlyForecastView_Previews: PreviewProvider {
     static var previews: some View {
@@ -121,7 +111,7 @@ struct HourlyForecastView_Previews: PreviewProvider {
             ),
             hour: sampleHours
         )
-        
+
         NavigationView {
             HourlyForecastView(forecastDay: sampleDay, dayLabel: "Today")
         }

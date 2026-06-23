@@ -1,46 +1,33 @@
-//
-//  LocationManager.swift
-//  WeatherHub
-//
 
 import Foundation
 import CoreLocation
 import Combine
 
-/// Manages device location access using CoreLocation.
-/// Publishes the user's current coordinates so the app can fetch local weather.
 final class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
 
-    // MARK: - Published Properties
 
     @Published var latitude: Double?
     @Published var longitude: Double?
     @Published var authorizationStatus: CLAuthorizationStatus
     @Published var locationError: String?
 
-    // MARK: - Private Properties
 
     private let manager = CLLocationManager()
 
-    // MARK: - Computed Properties
 
-    /// Returns a "lat,lon" query string suitable for the weather API, or `nil` if location is unavailable.
     var coordinateQuery: String? {
         guard let lat = latitude, let lon = longitude else { return nil }
         return "\(lat),\(lon)"
     }
 
-    /// Whether the user has granted location permission.
     var isAuthorized: Bool {
         authorizationStatus == .authorizedWhenInUse || authorizationStatus == .authorizedAlways
     }
 
-    /// Whether the authorization has been determined yet.
     var isDetermined: Bool {
         authorizationStatus != .notDetermined
     }
 
-    // MARK: - Initialization
 
     override init() {
         self.authorizationStatus = manager.authorizationStatus
@@ -49,9 +36,7 @@ final class LocationManager: NSObject, ObservableObject, CLLocationManagerDelega
         manager.desiredAccuracy = kCLLocationAccuracyKilometer
     }
 
-    // MARK: - Public Methods
 
-    /// Requests location permission and starts updating location.
     func requestLocation() {
         locationError = nil
 
@@ -67,7 +52,6 @@ final class LocationManager: NSObject, ObservableObject, CLLocationManagerDelega
         }
     }
 
-    // MARK: - CLLocationManagerDelegate
 
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         guard let location = locations.last else { return }

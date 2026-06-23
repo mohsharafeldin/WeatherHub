@@ -1,14 +1,8 @@
-//
-//  CityList.swift
-//  WeatherHub
-//
 
 import Foundation
 
 enum CityList {
-    /// A curated collection of 200+ major cities from all continents.
     static let allCities: [City] = [
-        // ─── Africa ──────────────────────────────────────────────
         City(name: "Cairo", country: "Egypt"),
         City(name: "Alexandria", country: "Egypt"),
         City(name: "Giza", country: "Egypt"),
@@ -40,7 +34,6 @@ enum CityList {
         City(name: "Harare", country: "Zimbabwe"),
         City(name: "Windhoek", country: "Namibia"),
 
-        // ─── Middle East ─────────────────────────────────────────
         City(name: "Dubai", country: "UAE"),
         City(name: "Abu Dhabi", country: "UAE"),
         City(name: "Sharjah", country: "UAE"),
@@ -59,7 +52,6 @@ enum CityList {
         City(name: "Sana'a", country: "Yemen"),
         City(name: "Aden", country: "Yemen"),
 
-        // ─── Europe – Western ────────────────────────────────────
         City(name: "London", country: "United Kingdom"),
         City(name: "Edinburgh", country: "United Kingdom"),
         City(name: "Manchester", country: "United Kingdom"),
@@ -78,7 +70,6 @@ enum CityList {
         City(name: "Reykjavik", country: "Iceland"),
         City(name: "Luxembourg", country: "Luxembourg"),
 
-        // ─── Europe – Central ────────────────────────────────────
         City(name: "Berlin", country: "Germany"),
         City(name: "Munich", country: "Germany"),
         City(name: "Hamburg", country: "Germany"),
@@ -92,7 +83,6 @@ enum CityList {
         City(name: "Bratislava", country: "Slovakia"),
         City(name: "Ljubljana", country: "Slovenia"),
 
-        // ─── Europe – Southern ───────────────────────────────────
         City(name: "Rome", country: "Italy"),
         City(name: "Milan", country: "Italy"),
         City(name: "Naples", country: "Italy"),
@@ -110,7 +100,6 @@ enum CityList {
         City(name: "Valletta", country: "Malta"),
         City(name: "Nicosia", country: "Cyprus"),
 
-        // ─── Europe – Northern ───────────────────────────────────
         City(name: "Copenhagen", country: "Denmark"),
         City(name: "Stockholm", country: "Sweden"),
         City(name: "Gothenburg", country: "Sweden"),
@@ -120,7 +109,6 @@ enum CityList {
         City(name: "Riga", country: "Latvia"),
         City(name: "Vilnius", country: "Lithuania"),
 
-        // ─── Europe – Eastern & Southeastern ─────────────────────
         City(name: "Moscow", country: "Russia"),
         City(name: "Saint Petersburg", country: "Russia"),
         City(name: "Bucharest", country: "Romania"),
@@ -136,7 +124,6 @@ enum CityList {
         City(name: "Kyiv", country: "Ukraine"),
         City(name: "Chisinau", country: "Moldova"),
 
-        // ─── Caucasus & Central Asia ─────────────────────────────
         City(name: "Tbilisi", country: "Georgia"),
         City(name: "Yerevan", country: "Armenia"),
         City(name: "Baku", country: "Azerbaijan"),
@@ -147,7 +134,6 @@ enum CityList {
         City(name: "Dushanbe", country: "Tajikistan"),
         City(name: "Ashgabat", country: "Turkmenistan"),
 
-        // ─── South Asia ─────────────────────────────────────────
         City(name: "Mumbai", country: "India"),
         City(name: "Delhi", country: "India"),
         City(name: "Bangalore", country: "India"),
@@ -162,7 +148,6 @@ enum CityList {
         City(name: "Kathmandu", country: "Nepal"),
         City(name: "Kabul", country: "Afghanistan"),
 
-        // ─── East Asia ──────────────────────────────────────────
         City(name: "Beijing", country: "China"),
         City(name: "Shanghai", country: "China"),
         City(name: "Guangzhou", country: "China"),
@@ -184,7 +169,6 @@ enum CityList {
         City(name: "Taipei", country: "Taiwan"),
         City(name: "Ulaanbaatar", country: "Mongolia"),
 
-        // ─── Southeast Asia ─────────────────────────────────────
         City(name: "Bangkok", country: "Thailand"),
         City(name: "Singapore", country: "Singapore"),
         City(name: "Jakarta", country: "Indonesia"),
@@ -197,7 +181,6 @@ enum CityList {
         City(name: "Yangon", country: "Myanmar"),
         City(name: "Vientiane", country: "Laos"),
 
-        // ─── North America ──────────────────────────────────────
         City(name: "New York", country: "United States"),
         City(name: "Los Angeles", country: "United States"),
         City(name: "Chicago", country: "United States"),
@@ -227,7 +210,6 @@ enum CityList {
         City(name: "Cancun", country: "Mexico"),
         City(name: "Guadalajara", country: "Mexico"),
 
-        // ─── Central America & Caribbean ─────────────────────────
         City(name: "Havana", country: "Cuba"),
         City(name: "Panama City", country: "Panama"),
         City(name: "San Jose", country: "Costa Rica"),
@@ -240,7 +222,6 @@ enum CityList {
         City(name: "Santo Domingo", country: "Dominican Republic"),
         City(name: "Nassau", country: "Bahamas"),
 
-        // ─── South America ──────────────────────────────────────
         City(name: "Bogota", country: "Colombia"),
         City(name: "Medellin", country: "Colombia"),
         City(name: "Lima", country: "Peru"),
@@ -256,7 +237,6 @@ enum CityList {
         City(name: "Asuncion", country: "Paraguay"),
         City(name: "Georgetown", country: "Guyana"),
 
-        // ─── Oceania ─────────────────────────────────────────────
         City(name: "Sydney", country: "Australia"),
         City(name: "Melbourne", country: "Australia"),
         City(name: "Brisbane", country: "Australia"),

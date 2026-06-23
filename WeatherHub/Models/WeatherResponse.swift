@@ -1,11 +1,6 @@
-//
-//  WeatherResponse.swift
-//  WeatherHub
-//
 
 import Foundation
 
-// MARK: - Root Response
 
 struct WeatherResponse: Codable {
     let location: Location
@@ -13,7 +8,6 @@ struct WeatherResponse: Codable {
     let forecast: Forecast
 }
 
-// MARK: - Location
 
 struct Location: Codable {
     let name: String
@@ -24,7 +18,6 @@ struct Location: Codable {
     let localtime: String
 }
 
-// MARK: - Current Weather
 
 struct CurrentWeather: Codable {
     let tempC: Double
@@ -48,7 +41,6 @@ struct CurrentWeather: Codable {
     }
 }
 
-// MARK: - Weather Condition
 
 struct WeatherCondition: Codable {
     let text: String
@@ -56,13 +48,11 @@ struct WeatherCondition: Codable {
     let code: Int
 }
 
-// MARK: - Forecast
 
 struct Forecast: Codable {
     let forecastday: [ForecastDay]
 }
 
-// MARK: - Forecast Day
 
 struct ForecastDay: Codable, Identifiable {
     let date: String
@@ -72,7 +62,6 @@ struct ForecastDay: Codable, Identifiable {
     var id: String { date }
 }
 
-// MARK: - Day
 
 struct Day: Codable {
     let maxtempC: Double
@@ -86,7 +75,6 @@ struct Day: Codable {
     }
 }
 
-// MARK: - Hour Weather
 
 struct HourWeather: Codable, Identifiable {
     let timeEpoch: Int

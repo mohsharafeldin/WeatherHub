@@ -1,36 +1,14 @@
-// WeatherInfoCard.swift
-// WeatherHub
-//
-// Created by WeatherHub on 2024.
-//
 
 import SwiftUI
 
-/// A reusable glassmorphic card that displays a single weather statistic.
-///
-/// Used for detail stats such as Humidity, Visibility, Feels Like, and Pressure.
-///
-/// Usage:
-/// ```swift
-/// WeatherInfoCard(
-///     title: "Humidity",
-///     value: "72%",
-///     systemIcon: "humidity",
-///     textColor: .white
-/// )
-/// ```
 struct WeatherInfoCard: View {
 
-    /// The label displayed above the value (e.g. "HUMIDITY").
     let title: String
 
-    /// The formatted value to display (e.g. "72%").
     let value: String
 
-    /// An SF Symbol name shown alongside the title.
     let systemIcon: String
 
-    /// The primary text colour, adapted to the current theme.
     let textColor: Color
 
     var body: some View {
@@ -56,7 +34,6 @@ struct WeatherInfoCard: View {
     }
 }
 
-// MARK: - Preview
 
 struct WeatherInfoCard_Previews: PreviewProvider {
     static var previews: some View {

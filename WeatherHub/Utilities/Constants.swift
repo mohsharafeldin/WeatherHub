@@ -1,7 +1,3 @@
-//
-//  Constants.swift
-//  WeatherHub
-//
 
 import Foundation
 

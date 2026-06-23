@@ -1,44 +1,36 @@
-//
-//  SavedLocationsView.swift
-//  WeatherHub
-//
-//  Created by mohamed sharaf on 23/06/2026.
-//
 
 import SwiftUI
 
 struct SavedLocationsView: View {
     @StateObject private var viewModel = SearchViewModel()
-    
+
     private var timeOfDay: TimeOfDay {
         TimeOfDayHelper.current()
     }
-    
+
     private var backgroundColors: [Color] {
         TimeOfDayHelper.backgroundGradient(for: timeOfDay)
     }
-    
+
     private var textColor: Color {
         TimeOfDayHelper.textColor(for: timeOfDay)
     }
-    
+
     private var secondaryTextColor: Color {
         TimeOfDayHelper.secondaryTextColor(for: timeOfDay)
     }
-    
+
     var body: some View {
         NavigationView {
             ZStack {
-                // Background gradient
                 LinearGradient(
                     colors: backgroundColors,
                     startPoint: .topLeading,
                     endPoint: .bottomTrailing
                 )
                 .ignoresSafeArea()
-                
+
                 List {
-                    // MARK: - Search Results Section
                     if !viewModel.filteredCities.isEmpty {
                         Section {
                             ForEach(viewModel.filteredCities) { city in
@@ -60,8 +52,7 @@ struct SavedLocationsView: View {
                             .foregroundColor(secondaryTextColor)
                         }
                     }
-                    
-                    // MARK: - Favourites Section
+
                     Section {
                         if viewModel.favourites.isEmpty {
                             emptyFavouritesView
@@ -72,23 +63,26 @@ struct SavedLocationsView: View {
                         } else {
                             ForEach(viewModel.favourites, id: \.self) { location in
                                 NavigationLink(destination: WeatherDetailView(query: location.cityName ?? "")) {
-                                    VStack(alignment: .leading, spacing: 4) {
+                                    VStack(alignment: .leading, spacing: 6) {
                                         Text(location.cityName ?? "Unknown")
-                                            .font(.body.weight(.medium))
+                                            .font(.title3.weight(.semibold))
                                             .foregroundColor(textColor)
-                                        
+
                                         if let country = location.country, !country.isEmpty {
                                             Text(country)
-                                                .font(.caption)
+                                                .font(.subheadline)
                                                 .foregroundColor(secondaryTextColor)
                                         }
                                     }
-                                    .padding(.vertical, 4)
+                                    .padding(.vertical, 14)
                                 }
                                 .listRowBackground(
-                                    RoundedRectangle(cornerRadius: 8)
+                                    RoundedRectangle(cornerRadius: 14)
                                         .fill(.ultraThinMaterial)
+                                        .padding(.vertical, 5)
                                 )
+                                .listRowSeparator(.hidden)
+                                .listRowInsets(EdgeInsets(top: 5, leading: 20, bottom: 5, trailing: 20))
                             }
                             .onDelete { indexSet in
                                 if let index = indexSet.first,
@@ -130,31 +124,28 @@ struct SavedLocationsView: View {
             }
         }
     }
-    
-    // MARK: - Search Result Row
-    
+
+
     private func searchResultRow(for city: City) -> some View {
         ZStack(alignment: .leading) {
-            // Hidden NavigationLink for full-row tap
             NavigationLink(destination: WeatherDetailView(query: city.name)) {
                 EmptyView()
             }
             .opacity(0)
-            
+
             HStack(spacing: 12) {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(city.name)
                         .font(.body.weight(.medium))
                         .foregroundColor(textColor)
-                    
+
                     Text(city.country)
                         .font(.caption)
                         .foregroundColor(secondaryTextColor)
                 }
-                
+
                 Spacer()
-                
-                // Favourite toggle button
+
                 Button {
                     withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
                         viewModel.addToFavourites(city)
@@ -170,19 +161,18 @@ struct SavedLocationsView: View {
             }
         }
     }
-    
-    // MARK: - Empty Favourites
-    
+
+
     private var emptyFavouritesView: some View {
         VStack(spacing: 12) {
             Image(systemName: "mappin.slash")
                 .font(.system(size: 32))
                 .foregroundColor(secondaryTextColor)
-            
+
             Text("No saved locations")
                 .font(.subheadline.weight(.medium))
                 .foregroundColor(textColor)
-            
+
             Text("Search for a city and tap the heart to save it")
                 .font(.caption)
                 .foregroundColor(secondaryTextColor)
@@ -193,7 +183,6 @@ struct SavedLocationsView: View {
     }
 }
 
-// MARK: - Preview
 
 struct SavedLocationsView_Previews: PreviewProvider {
     static var previews: some View {

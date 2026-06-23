@@ -1,12 +1,7 @@
-//
-//  NetworkService.swift
-//  WeatherHub
-//
 
 import Foundation
 import Combine
 
-// MARK: - Network Errors
 
 enum NetworkError: LocalizedError {
     case invalidURL
@@ -34,13 +29,11 @@ enum NetworkError: LocalizedError {
     }
 }
 
-// MARK: - Protocol
 
 protocol WeatherServiceProtocol {
     func fetchWeather(query: String) -> AnyPublisher<WeatherResponse, NetworkError>
 }
 
-// MARK: - Implementation
 
 final class NetworkService: WeatherServiceProtocol {
 

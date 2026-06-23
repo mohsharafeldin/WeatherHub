@@ -1,12 +1,7 @@
-//
-//  CoreDataService.swift
-//  WeatherHub
-//
 
 import Foundation
 import CoreData
 
-// MARK: - Protocol
 
 protocol FavouriteRepositoryProtocol {
     func fetchFavourites() -> [FavouriteLocation]
@@ -15,7 +10,6 @@ protocol FavouriteRepositoryProtocol {
     func isFavourite(cityName: String) -> Bool
 }
 
-// MARK: - Implementation
 
 final class CoreDataService: FavouriteRepositoryProtocol {
 
@@ -25,7 +19,6 @@ final class CoreDataService: FavouriteRepositoryProtocol {
         self.viewContext = context
     }
 
-    // MARK: - Fetch
 
     func fetchFavourites() -> [FavouriteLocation] {
         let request: NSFetchRequest<FavouriteLocation> = FavouriteLocation.fetchRequest()
@@ -39,7 +32,6 @@ final class CoreDataService: FavouriteRepositoryProtocol {
         }
     }
 
-    // MARK: - Add
 
     func addFavourite(cityName: String, country: String, latitude: Double, longitude: Double) {
         let favourite = FavouriteLocation(context: viewContext)
@@ -53,14 +45,12 @@ final class CoreDataService: FavouriteRepositoryProtocol {
         saveContext()
     }
 
-    // MARK: - Delete
 
     func deleteFavourite(_ location: FavouriteLocation) {
         viewContext.delete(location)
         saveContext()
     }
 
-    // MARK: - Query
 
     func isFavourite(cityName: String) -> Bool {
         let request: NSFetchRequest<FavouriteLocation> = FavouriteLocation.fetchRequest()
@@ -76,7 +66,6 @@ final class CoreDataService: FavouriteRepositoryProtocol {
         }
     }
 
-    // MARK: - Private
 
     private func saveContext() {
         guard viewContext.hasChanges else { return }

@@ -1,16 +1,28 @@
-//
-//  Home.swift
-//  WeatherHub
-//
-//  Created by mohamed sharaf on 20/06/2026.
-//
 
 import SwiftUI
 
 struct Home: View {
     @State private var selectedTab = 0
     @StateObject private var locationManager = LocationManager()
-    
+
+    init() {
+        let appearance = UITabBarAppearance()
+        appearance.configureWithDefaultBackground()
+        appearance.backgroundColor = UIColor(white: 0.08, alpha: 0.85)
+        appearance.backgroundEffect = UIBlurEffect(style: .systemChromeMaterialDark)
+
+        let normalColor = UIColor(white: 1.0, alpha: 0.5)
+        appearance.stackedLayoutAppearance.normal.iconColor = normalColor
+        appearance.stackedLayoutAppearance.normal.titleTextAttributes = [.foregroundColor: normalColor]
+
+        let selectedColor = UIColor.white
+        appearance.stackedLayoutAppearance.selected.iconColor = selectedColor
+        appearance.stackedLayoutAppearance.selected.titleTextAttributes = [.foregroundColor: selectedColor]
+
+        UITabBar.appearance().standardAppearance = appearance
+        UITabBar.appearance().scrollEdgeAppearance = appearance
+    }
+
     var body: some View {
         TabView(selection: $selectedTab) {
             NavigationView {
@@ -22,7 +34,7 @@ struct Home: View {
                 Text("My Location")
             }
             .tag(0)
-            
+
             SavedLocationsView()
                 .tabItem {
                     Image(systemName: "mappin.and.ellipse")
@@ -35,16 +47,13 @@ struct Home: View {
             locationManager.requestLocation()
         }
     }
-    
-    // MARK: - Current Location Weather
-    
+
+
     @ViewBuilder
     private var currentLocationWeatherView: some View {
         if let query = locationManager.coordinateQuery {
-            // Location available — show weather
             WeatherDetailView(query: query)
         } else if let error = locationManager.locationError {
-            // Permission denied or error
             locationStatusView(
                 icon: "location.slash.fill",
                 title: "Location Unavailable",
@@ -52,7 +61,6 @@ struct Home: View {
                 showSettingsButton: locationManager.authorizationStatus == .denied
             )
         } else {
-            // Waiting for location
             locationStatusView(
                 icon: "location.circle",
                 title: "Finding Your Location…",
@@ -61,7 +69,7 @@ struct Home: View {
             )
         }
     }
-    
+
     private func locationStatusView(icon: String, title: String, message: String, showSettingsButton: Bool) -> some View {
         ZStack {
             LinearGradient(
@@ -70,22 +78,22 @@ struct Home: View {
                 endPoint: .bottomTrailing
             )
             .ignoresSafeArea()
-            
+
             VStack(spacing: 20) {
                 Image(systemName: icon)
                     .font(.system(size: 56))
                     .foregroundColor(.white.opacity(0.7))
-                
+
                 Text(title)
                     .font(.title2.weight(.semibold))
                     .foregroundColor(.white)
-                
+
                 Text(message)
                     .font(.subheadline)
                     .foregroundColor(.white.opacity(0.7))
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 40)
-                
+
                 if showSettingsButton {
                     Button(action: openAppSettings) {
                         HStack(spacing: 8) {
@@ -109,7 +117,7 @@ struct Home: View {
             }
         }
     }
-    
+
     private func openAppSettings() {
         guard let url = URL(string: UIApplication.openSettingsURLString) else { return }
         UIApplication.shared.open(url)
