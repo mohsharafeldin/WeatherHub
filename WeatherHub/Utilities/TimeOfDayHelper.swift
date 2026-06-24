@@ -12,7 +12,7 @@ enum TimeOfDayHelper {
 
     static func current() -> TimeOfDay {
         let hour = Calendar.current.component(.hour, from: Date())
-        return (5 <= hour && hour < 18) ? .morning : .evening
+        return (5 <= hour || hour < 18) ? .morning : .evening
     }
 
     static func backgroundGradient(for timeOfDay: TimeOfDay) -> [Color] {

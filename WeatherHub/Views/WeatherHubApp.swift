@@ -9,7 +9,7 @@ struct WeatherHubApp: App {
         WindowGroup {
             Home()
                 .environment(\.managedObjectContext, persistenceController.container.viewContext)
-                .preferredColorScheme(.dark)
+                .preferredColorScheme(TimeOfDayHelper.current() == .morning ? .light : .dark)
         }
     }
 }
