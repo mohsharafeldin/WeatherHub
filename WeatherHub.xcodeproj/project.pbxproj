@@ -164,14 +164,14 @@
 			path = CoreData;
 			sourceTree = "<group>";
 		};
-		5A999F852FEC73220009B158 /* Modules */ = {
+		5A999F852FEC73220009B158 /* Moduels */ = {
 			isa = PBXGroup;
 			children = (
 				5A999F8C2FEC74750009B158 /* SavedLocations */,
 				5A999F892FEC741A0009B158 /* HourlyForecast */,
 				5A999F862FEC73950009B158 /* Home */,
 			);
-			path = Modules;
+			path = Moduels;
 			sourceTree = "<group>";
 		};
 		5A999F862FEC73950009B158 /* Home */ = {
@@ -279,7 +279,7 @@
 				5A9A9CD12FE8E0470070E8B5 /* Assets.xcassets */,
 				5A9A9CD82FE8E0470070E8B5 /* WeatherHub.xcdatamodeld */,
 				5A9A9CD32FE8E0470070E8B5 /* Preview Content */,
-				5A999F852FEC73220009B158 /* Modules */,
+				5A999F852FEC73220009B158 /* Moduels */,
 				CF7B51A597A45E1CC66203A7 /* Model */,
 				41FDDEF6267C012700A5BDF8 /* Utilities */,
 				A25F3D8A2B10F86F7ECC1B93 /* Views */,
