@@ -73,4 +73,9 @@ final class SearchViewModel: ObservableObject {
     func isFavourite(cityName: String) -> Bool {
         favouriteRepository.isFavourite(cityName: cityName)
     }
+
+    var showNoResults: Bool {
+        searchText.trimmingCharacters(in: .whitespacesAndNewlines).count >= 2
+        && filteredCities.isEmpty
+    }
 }

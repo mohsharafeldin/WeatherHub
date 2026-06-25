@@ -53,6 +53,17 @@ struct SavedLocationsView: View {
                         }
                     }
 
+                    if viewModel.showNoResults {
+                        Section {
+                            noResultsView
+                                .listRowBackground(
+                                    RoundedRectangle(cornerRadius: 14)
+                                        .fill(.ultraThinMaterial)
+                                )
+                                .listRowSeparator(.hidden)
+                        }
+                    }
+
                     Section {
                         if viewModel.favourites.isEmpty {
                             emptyFavouritesView
@@ -180,6 +191,54 @@ struct SavedLocationsView: View {
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 24)
+    }
+
+    @State private var globeRotating = false
+
+    private var noResultsView: some View {
+        VStack(spacing: 16) {
+            Image(systemName: "globe.americas")
+                .font(.system(size: 48, weight: .thin))
+                .foregroundStyle(
+                    LinearGradient(
+                        colors: [textColor.opacity(0.5), secondaryTextColor.opacity(0.3)],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                )
+                .rotationEffect(.degrees(globeRotating ? 360 : 0))
+                .onAppear {
+                    withAnimation(.linear(duration: 12).repeatForever(autoreverses: false)) {
+                        globeRotating = true
+                    }
+                }
+
+            VStack(spacing: 6) {
+                Text("No cities found")
+                    .font(.headline.weight(.semibold))
+                    .foregroundColor(textColor)
+
+                Text("\"\(viewModel.searchText)\" doesn't match any location")
+                    .font(.subheadline)
+                    .foregroundColor(secondaryTextColor)
+                    .multilineTextAlignment(.center)
+                    .lineLimit(2)
+            }
+
+            Text("Try searching for a city or country name")
+                .font(.caption)
+                .foregroundColor(secondaryTextColor.opacity(0.8))
+                .padding(.horizontal, 16)
+                .padding(.vertical, 8)
+                .background(
+                    Capsule()
+                        .fill(textColor.opacity(0.06))
+                )
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 32)
+        .transition(.opacity.combined(with: .scale(scale: 0.95)))
+        .animation(.easeOut(duration: 0.3), value: viewModel.showNoResults)
     }
 }
 
