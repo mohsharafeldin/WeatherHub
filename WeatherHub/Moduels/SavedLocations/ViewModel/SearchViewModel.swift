@@ -6,41 +6,82 @@ import CoreData
 final class SearchViewModel: ObservableObject {
 
 
+    @Published var showSearchSheet = false
     @Published var searchText = ""
+    @Published var searchResults: [City] = []
+    @Published var isSearching = false
+    @Published var searchError: String?
 
-    @Published var filteredCities: [City] = []
 
     @Published var favourites: [FavouriteLocation] = []
-
     @Published var showDeleteAlert = false
-
     @Published var locationToDelete: FavouriteLocation?
 
 
     private let favouriteRepository: FavouriteLocationRepositoryProtocol
+    private let networkService: WeatherNetworkServiceProtocol
     private var cancellables = Set<AnyCancellable>()
 
 
-    init(favouriteRepository: FavouriteLocationRepositoryProtocol = FavouriteLocationRepository()) {
+    var allCities: [City] {
+        CityList.allCities
+    }
+
+
+    var groupedCities: [(country: String, cities: [City])] {
+        let grouped = Dictionary(grouping: allCities) { $0.country }
+        return grouped
+            .sorted { $0.key < $1.key }
+            .map { (country: $0.key, cities: $0.value) }
+    }
+
+    init(
+        favouriteRepository: FavouriteLocationRepositoryProtocol = FavouriteLocationRepository(),
+        networkService: WeatherNetworkServiceProtocol = NetworkService()
+    ) {
         self.favouriteRepository = favouriteRepository
+        self.networkService = networkService
         setupSearchSubscription()
         loadFavourites()
     }
 
 
+
     private func setupSearchSubscription() {
         $searchText
-            .debounce(for: .milliseconds(300), scheduler: RunLoop.main)
+            .debounce(for: .milliseconds(500), scheduler: RunLoop.main)
             .removeDuplicates()
-            .map { text -> [City] in
-                guard !text.isEmpty else { return [] }
-                return CityList.allCities.filter { city in
-                    city.name.localizedCaseInsensitiveContains(text) ||
-                    city.country.localizedCaseInsensitiveContains(text)
+            .sink { [weak self] text in
+                guard let self else { return }
+                let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+                if trimmed.isEmpty {
+                    self.searchResults = []
+                    self.isSearching = false
+                    self.searchError = nil
+                } else {
+                    self.searchFromAPI(query: trimmed)
                 }
             }
-            .assign(to: &$filteredCities)
+            .store(in: &cancellables)
     }
+
+    private func searchFromAPI(query: String) {
+        isSearching = true
+        searchError = nil
+
+        networkService.searchCities(query: query)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] completion in
+                self?.isSearching = false
+                if case .failure(let error) = completion {
+                    self?.searchError = error.localizedDescription
+                }
+            } receiveValue: { [weak self] results in
+                self?.searchResults = results.map { $0.asCity }
+            }
+            .store(in: &cancellables)
+    }
+
 
 
     func loadFavourites() {
@@ -75,7 +116,9 @@ final class SearchViewModel: ObservableObject {
     }
 
     var showNoResults: Bool {
-        searchText.trimmingCharacters(in: .whitespacesAndNewlines).count >= 2
-        && filteredCities.isEmpty
+        !isSearching
+        && searchText.trimmingCharacters(in: .whitespacesAndNewlines).count >= 2
+        && searchResults.isEmpty
+        && searchError == nil
     }
 }

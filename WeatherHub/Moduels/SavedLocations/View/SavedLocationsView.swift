@@ -3,9 +3,10 @@ import SwiftUI
 
 struct SavedLocationsView: View {
     @StateObject private var viewModel = SearchViewModel()
+    @ObservedObject private var timeOfDayManager = TimeOfDayManager.shared
 
     private var timeOfDay: TimeOfDay {
-        TimeOfDayHelper.current()
+        timeOfDayManager.timeOfDay
     }
 
     private var backgroundColors: [Color] {
@@ -31,39 +32,6 @@ struct SavedLocationsView: View {
                 .ignoresSafeArea()
 
                 List {
-                    if !viewModel.filteredCities.isEmpty {
-                        Section {
-                            ForEach(viewModel.filteredCities) { city in
-                                searchResultRow(for: city)
-                                    .listRowBackground(
-                                        RoundedRectangle(cornerRadius: 8)
-                                            .fill(.ultraThinMaterial)
-                                    )
-                            }
-                        } header: {
-                            Label {
-                                Text("Search Results")
-                                    .textCase(.uppercase)
-                                    .tracking(0.5)
-                            } icon: {
-                                Image(systemName: "magnifyingglass")
-                            }
-                            .font(.caption.weight(.semibold))
-                            .foregroundColor(secondaryTextColor)
-                        }
-                    }
-
-                    if viewModel.showNoResults {
-                        Section {
-                            noResultsView
-                                .listRowBackground(
-                                    RoundedRectangle(cornerRadius: 14)
-                                        .fill(.ultraThinMaterial)
-                                )
-                                .listRowSeparator(.hidden)
-                        }
-                    }
-
                     Section {
                         if viewModel.favourites.isEmpty {
                             emptyFavouritesView
@@ -118,10 +86,15 @@ struct SavedLocationsView: View {
                 .scrollContentBackground(.hidden)
             }
             .navigationTitle("Locations")
-            .searchable(
-                text: $viewModel.searchText,
-                prompt: "Search for a city..."
-            )
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    NavigationLink(destination: AddCityView(viewModel: viewModel)) {
+                        Image(systemName: "plus")
+                            .font(.body.weight(.semibold))
+                            .foregroundColor(textColor)
+                    }
+                }
+            }
             .alert("Delete Location", isPresented: $viewModel.showDeleteAlert) {
                 Button("Cancel", role: .cancel) { }
                 Button("Delete", role: .destructive) {
@@ -132,46 +105,11 @@ struct SavedLocationsView: View {
             }
             .onAppear {
                 viewModel.loadFavourites()
+                TimeOfDayManager.shared.resetToCurrentLocation()
             }
         }
     }
 
-
-    private func searchResultRow(for city: City) -> some View {
-        ZStack(alignment: .leading) {
-            NavigationLink(destination: WeatherDetailView(query: city.name)) {
-                EmptyView()
-            }
-            .opacity(0)
-
-            HStack(spacing: 12) {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(city.name)
-                        .font(.body.weight(.medium))
-                        .foregroundColor(textColor)
-
-                    Text(city.country)
-                        .font(.caption)
-                        .foregroundColor(secondaryTextColor)
-                }
-
-                Spacer()
-
-                Button {
-                    withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
-                        viewModel.addToFavourites(city)
-                    }
-                } label: {
-                    Image(systemName: viewModel.isFavourite(cityName: city.name) ? "heart.fill" : "heart")
-                        .font(.body)
-                        .foregroundColor(viewModel.isFavourite(cityName: city.name) ? .red : textColor.opacity(0.7))
-                        .frame(width: 36, height: 36)
-                        .contentShape(Rectangle())
-                }
-                .buttonStyle(.plain)
-            }
-        }
-    }
 
 
     private var emptyFavouritesView: some View {
@@ -184,7 +122,7 @@ struct SavedLocationsView: View {
                 .font(.subheadline.weight(.medium))
                 .foregroundColor(textColor)
 
-            Text("Search for a city and tap the heart to save it")
+            Text("Tap + to search and add cities")
                 .font(.caption)
                 .foregroundColor(secondaryTextColor)
                 .multilineTextAlignment(.center)
@@ -192,6 +130,201 @@ struct SavedLocationsView: View {
         .frame(maxWidth: .infinity)
         .padding(.vertical, 24)
     }
+}
+
+
+
+
+struct AddCityView: View {
+    @ObservedObject var viewModel: SearchViewModel
+    @ObservedObject private var timeOfDayManager = TimeOfDayManager.shared
+
+    private var timeOfDay: TimeOfDay {
+        timeOfDayManager.timeOfDay
+    }
+
+    private var backgroundColors: [Color] {
+        TimeOfDayHelper.backgroundGradient(for: timeOfDay)
+    }
+
+    private var textColor: Color {
+        TimeOfDayHelper.textColor(for: timeOfDay)
+    }
+
+    private var secondaryTextColor: Color {
+        TimeOfDayHelper.secondaryTextColor(for: timeOfDay)
+    }
+
+
+    private var displayMode: DisplayMode {
+        let trimmed = viewModel.searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+        if trimmed.isEmpty {
+            return .browse
+        } else if viewModel.isSearching {
+            return .loading
+        } else if let error = viewModel.searchError {
+            return .error(error)
+        } else if viewModel.searchResults.isEmpty {
+            return .noResults
+        } else {
+            return .results(viewModel.searchResults)
+        }
+    }
+
+    private enum DisplayMode {
+        case browse
+        case loading
+        case error(String)
+        case noResults
+        case results([City])
+    }
+
+    var body: some View {
+        ZStack {
+            LinearGradient(
+                colors: backgroundColors,
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            .ignoresSafeArea()
+
+            List {
+                switch displayMode {
+                case .browse:
+                    browseCitiesContent
+                case .loading:
+                    Section {
+                        HStack {
+                            Spacer()
+                            VStack(spacing: 12) {
+                                ProgressView()
+                                    .tint(textColor)
+                                    .scaleEffect(1.2)
+                                Text("Searching…")
+                                    .font(.subheadline)
+                                    .foregroundColor(secondaryTextColor)
+                            }
+                            .padding(.vertical, 32)
+                            Spacer()
+                        }
+                        .listRowBackground(
+                            RoundedRectangle(cornerRadius: 14)
+                                .fill(.ultraThinMaterial)
+                        )
+                    }
+                case .error(let message):
+                    Section {
+                        errorView(message: message)
+                            .listRowBackground(
+                                RoundedRectangle(cornerRadius: 14)
+                                    .fill(.ultraThinMaterial)
+                            )
+                    }
+                case .noResults:
+                    Section {
+                        noResultsView
+                            .listRowBackground(
+                                RoundedRectangle(cornerRadius: 14)
+                                    .fill(.ultraThinMaterial)
+                            )
+                            .listRowSeparator(.hidden)
+                    }
+                case .results(let cities):
+                    Section {
+                        ForEach(cities) { city in
+                            cityRow(for: city)
+                                .listRowBackground(
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .fill(.ultraThinMaterial)
+                                )
+                        }
+                    } header: {
+                        Label {
+                            Text("Search Results")
+                                .textCase(.uppercase)
+                                .tracking(0.5)
+                        } icon: {
+                            Image(systemName: "magnifyingglass")
+                        }
+                        .font(.caption.weight(.semibold))
+                        .foregroundColor(secondaryTextColor)
+                    }
+                }
+            }
+            .listStyle(.insetGrouped)
+            .scrollContentBackground(.hidden)
+        }
+        .navigationTitle("Add City")
+        .navigationBarTitleDisplayMode(.inline)
+        .onAppear {
+            TimeOfDayManager.shared.resetToCurrentLocation()
+        }
+        .searchable(
+            text: $viewModel.searchText,
+            placement: .navigationBarDrawer(displayMode: .always),
+            prompt: "Search for a city…"
+        )
+    }
+
+
+
+    private var browseCitiesContent: some View {
+        ForEach(viewModel.groupedCities, id: \.country) { group in
+            Section {
+                ForEach(group.cities) { city in
+                    cityRow(for: city)
+                        .listRowBackground(
+                            RoundedRectangle(cornerRadius: 8)
+                                .fill(.ultraThinMaterial)
+                        )
+                }
+            } header: {
+                HStack(spacing: 6) {
+                    Text(countryFlag(for: group.country))
+                    Text(group.country)
+                        .textCase(.uppercase)
+                        .tracking(0.5)
+                }
+                .font(.caption.weight(.semibold))
+                .foregroundColor(secondaryTextColor)
+            }
+        }
+    }
+
+
+
+    private func cityRow(for city: City) -> some View {
+        HStack(spacing: 12) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(city.name)
+                    .font(.body.weight(.medium))
+                    .foregroundColor(textColor)
+
+                Text(city.country)
+                    .font(.caption)
+                    .foregroundColor(secondaryTextColor)
+            }
+
+            Spacer()
+
+            Button {
+                withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
+                    viewModel.addToFavourites(city)
+                }
+            } label: {
+                Image(systemName: viewModel.isFavourite(cityName: city.name) ? "heart.fill" : "heart")
+                    .font(.body)
+                    .foregroundColor(viewModel.isFavourite(cityName: city.name) ? .red : textColor.opacity(0.7))
+                    .frame(width: 36, height: 36)
+                    .contentShape(Rectangle())
+                    .scaleEffect(viewModel.isFavourite(cityName: city.name) ? 1.15 : 1.0)
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(.vertical, 4)
+    }
+
+
 
     @State private var globeRotating = false
 
@@ -239,6 +372,69 @@ struct SavedLocationsView: View {
         .padding(.vertical, 32)
         .transition(.opacity.combined(with: .scale(scale: 0.95)))
         .animation(.easeOut(duration: 0.3), value: viewModel.showNoResults)
+    }
+
+
+
+    private func errorView(message: String) -> some View {
+        VStack(spacing: 12) {
+            Image(systemName: "wifi.exclamationmark")
+                .font(.system(size: 36))
+                .foregroundColor(secondaryTextColor)
+
+            Text("Search failed")
+                .font(.subheadline.weight(.medium))
+                .foregroundColor(textColor)
+
+            Text(message)
+                .font(.caption)
+                .foregroundColor(secondaryTextColor)
+                .multilineTextAlignment(.center)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 24)
+    }
+
+
+
+    private func countryFlag(for country: String) -> String {
+        let countryMap: [String: String] = [
+            "Egypt": "🇪🇬", "Nigeria": "🇳🇬", "Ghana": "🇬🇭", "Kenya": "🇰🇪",
+            "Tanzania": "🇹🇿", "Ethiopia": "🇪🇹", "Morocco": "🇲🇦", "Tunisia": "🇹🇳",
+            "Algeria": "🇩🇿", "South Africa": "🇿🇦", "Rwanda": "🇷🇼", "Uganda": "🇺🇬",
+            "Senegal": "🇸🇳", "Ivory Coast": "🇨🇮", "Mozambique": "🇲🇿", "Zambia": "🇿🇲",
+            "Zimbabwe": "🇿🇼", "Namibia": "🇳🇦", "UAE": "🇦🇪", "Saudi Arabia": "🇸🇦",
+            "Qatar": "🇶🇦", "Kuwait": "🇰🇼", "Oman": "🇴🇲", "Bahrain": "🇧🇭",
+            "Jordan": "🇯🇴", "Lebanon": "🇱🇧", "Iraq": "🇮🇶", "Iran": "🇮🇷",
+            "Yemen": "🇾🇪", "United Kingdom": "🇬🇧", "Ireland": "🇮🇪", "France": "🇫🇷",
+            "Netherlands": "🇳🇱", "Belgium": "🇧🇪", "Switzerland": "🇨🇭", "Portugal": "🇵🇹",
+            "Iceland": "🇮🇸", "Luxembourg": "🇱🇺", "Germany": "🇩🇪", "Austria": "🇦🇹",
+            "Czech Republic": "🇨🇿", "Hungary": "🇭🇺", "Poland": "🇵🇱", "Slovakia": "🇸🇰",
+            "Slovenia": "🇸🇮", "Italy": "🇮🇹", "Spain": "🇪🇸", "Greece": "🇬🇷",
+            "Turkey": "🇹🇷", "Malta": "🇲🇹", "Cyprus": "🇨🇾", "Denmark": "🇩🇰",
+            "Sweden": "🇸🇪", "Norway": "🇳🇴", "Finland": "🇫🇮", "Estonia": "🇪🇪",
+            "Latvia": "🇱🇻", "Lithuania": "🇱🇹", "Russia": "🇷🇺", "Romania": "🇷🇴",
+            "Bulgaria": "🇧🇬", "Serbia": "🇷🇸", "Croatia": "🇭🇷",
+            "Bosnia and Herzegovina": "🇧🇦", "Montenegro": "🇲🇪", "North Macedonia": "🇲🇰",
+            "Albania": "🇦🇱", "Kosovo": "🇽🇰", "Belarus": "🇧🇾", "Ukraine": "🇺🇦",
+            "Moldova": "🇲🇩", "Georgia": "🇬🇪", "Armenia": "🇦🇲", "Azerbaijan": "🇦🇿",
+            "Uzbekistan": "🇺🇿", "Kazakhstan": "🇰🇿", "Kyrgyzstan": "🇰🇬",
+            "Tajikistan": "🇹🇯", "Turkmenistan": "🇹🇲", "India": "🇮🇳", "Pakistan": "🇵🇰",
+            "Bangladesh": "🇧🇩", "Sri Lanka": "🇱🇰", "Nepal": "🇳🇵", "Afghanistan": "🇦🇫",
+            "China": "🇨🇳", "Japan": "🇯🇵", "South Korea": "🇰🇷", "Taiwan": "🇹🇼",
+            "Mongolia": "🇲🇳", "Thailand": "🇹🇭", "Singapore": "🇸🇬", "Indonesia": "🇮🇩",
+            "Philippines": "🇵🇭", "Malaysia": "🇲🇾", "Vietnam": "🇻🇳", "Cambodia": "🇰🇭",
+            "Myanmar": "🇲🇲", "Laos": "🇱🇦", "United States": "🇺🇸", "Canada": "🇨🇦",
+            "Mexico": "🇲🇽", "Cuba": "🇨🇺", "Panama": "🇵🇦", "Costa Rica": "🇨🇷",
+            "Guatemala": "🇬🇹", "Honduras": "🇭🇳", "El Salvador": "🇸🇻",
+            "Nicaragua": "🇳🇮", "Jamaica": "🇯🇲", "Haiti": "🇭🇹",
+            "Dominican Republic": "🇩🇴", "Bahamas": "🇧🇸", "Colombia": "🇨🇴",
+            "Peru": "🇵🇪", "Chile": "🇨🇱", "Argentina": "🇦🇷", "Uruguay": "🇺🇾",
+            "Brazil": "🇧🇷", "Ecuador": "🇪🇨", "Venezuela": "🇻🇪", "Bolivia": "🇧🇴",
+            "Paraguay": "🇵🇾", "Guyana": "🇬🇾", "Australia": "🇦🇺",
+            "New Zealand": "🇳🇿", "Fiji": "🇫🇯"
+        ]
+        return countryMap[country] ?? "🌍"
     }
 }
 

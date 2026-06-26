@@ -6,15 +6,18 @@ struct HourlyForecastView: View {
 
     @State private var contentOpacity: Double = 0
 
-    init(forecastDay: ForecastDay, dayLabel: String) {
+    init(forecastDay: ForecastDay, dayLabel: String, timeOfDay: TimeOfDay) {
         _viewModel = StateObject(wrappedValue: HourlyForecastViewModel(
             forecastDay: forecastDay,
-            dayLabel: dayLabel
+            dayLabel: dayLabel,
+            timeOfDay: timeOfDay
         ))
     }
 
     private let columns = [
-        GridItem(.adaptive(minimum: 72), spacing: 12)
+        GridItem(.flexible(), spacing: 14),
+        GridItem(.flexible(), spacing: 14),
+        GridItem(.flexible(), spacing: 14)
     ]
 
     var body: some View {
@@ -55,7 +58,7 @@ struct HourlyForecastView: View {
                             .background(viewModel.textColor.opacity(0.2))
                             .padding(.horizontal, 16)
 
-                        LazyVGrid(columns: columns, spacing: 12) {
+                        LazyVGrid(columns: columns, spacing: 14) {
                             ForEach(viewModel.hours) { hour in
                                 HourlyCell(
                                     hour: viewModel.hourLabel(for: hour),
@@ -113,7 +116,7 @@ struct HourlyForecastView_Previews: PreviewProvider {
         )
 
         NavigationView {
-            HourlyForecastView(forecastDay: sampleDay, dayLabel: "Today")
+            HourlyForecastView(forecastDay: sampleDay, dayLabel: "Today", timeOfDay: .morning)
         }
     }
 }

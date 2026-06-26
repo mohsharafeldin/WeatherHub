@@ -4,6 +4,7 @@ import SwiftUI
 struct WeatherDetailView: View {
     @StateObject private var viewModel = WeatherViewModel()
     let query: String
+    var isCurrentLocation: Bool = false
 
     @State private var contentOpacity: Double = 0
 
@@ -48,7 +49,7 @@ struct WeatherDetailView: View {
         }
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {
-            viewModel.fetchWeather(for: query)
+            viewModel.fetchWeather(for: query, isCurrentLocation: isCurrentLocation)
         }
     }
 
@@ -70,7 +71,7 @@ struct WeatherDetailView: View {
                 .padding(.horizontal, 40)
 
             Button(action: {
-                viewModel.fetchWeather(for: query)
+                viewModel.fetchWeather(for: query, isCurrentLocation: isCurrentLocation)
             }) {
                 HStack(spacing: 8) {
                     Image(systemName: "arrow.clockwise")
@@ -161,7 +162,7 @@ struct WeatherDetailView: View {
                     let highTemp = "\(Int(day.day.maxtempC))°"
                     let label = viewModel.dayLabel(for: index)
 
-                    NavigationLink(destination: HourlyForecastView(forecastDay: day, dayLabel: label)) {
+                    NavigationLink(destination: HourlyForecastView(forecastDay: day, dayLabel: label, timeOfDay: viewModel.timeOfDay)) {
                         ForecastRowView(
                             dayLabel: label,
                             iconURL: iconURL,

@@ -12,21 +12,21 @@ struct HourlyCell: View {
     let textColor: Color
 
     var body: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: 14) {
             Text(hour)
-                .font(.callout)
+                .font(.body)
                 .fontWeight(.medium)
                 .foregroundColor(textColor)
 
-            AsyncWeatherIcon(iconURL: iconURL, size: 40)
+            AsyncWeatherIcon(iconURL: iconURL, size: 48)
 
             Text(temperature)
-                .font(.title3)
+                .font(.title2)
                 .fontWeight(.semibold)
                 .foregroundColor(textColor)
         }
-        .frame(width: 70)
-        .padding(.vertical, 16)
+        .frame(minWidth: 80, maxWidth: .infinity)
+        .padding(.vertical, 20)
         .glassmorphic()
     }
 }
