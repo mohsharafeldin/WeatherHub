@@ -9,8 +9,6 @@ final class WeatherViewModel: ObservableObject {
     @Published var weatherResponse: WeatherResponse?
     @Published var isLoading = false
     @Published var errorMessage: String?
-
-
     private let weatherRepository: WeatherRepositoryProtocol
     private var cancellables = Set<AnyCancellable>()
 
@@ -77,7 +75,10 @@ final class WeatherViewModel: ObservableObject {
     }
 
     var timeOfDay: TimeOfDay {
-        TimeOfDayHelper.current()
+        if let isDay = weatherResponse?.current.isDay {
+            return isDay == 1 ? .morning : .evening
+        }
+        return TimeOfDayManager.shared.timeOfDay
     }
 
     var backgroundColors: [Color] {
@@ -93,7 +94,7 @@ final class WeatherViewModel: ObservableObject {
     }
 
 
-    func fetchWeather(for query: String) {
+    func fetchWeather(for query: String, isCurrentLocation: Bool = false) {
         isLoading = true
         errorMessage = nil
 
@@ -106,6 +107,7 @@ final class WeatherViewModel: ObservableObject {
                 }
             }, receiveValue: { [weak self] response in
                 self?.weatherResponse = response
+                TimeOfDayManager.shared.update(from: response, isCurrentLocation: isCurrentLocation)
             })
             .store(in: &cancellables)
     }

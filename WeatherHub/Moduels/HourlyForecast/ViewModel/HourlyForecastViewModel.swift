@@ -12,10 +12,7 @@ final class HourlyForecastViewModel: ObservableObject {
 
     let dayLabel: String
 
-
-    var timeOfDay: TimeOfDay {
-        TimeOfDayHelper.current()
-    }
+    let timeOfDay: TimeOfDay
 
     var backgroundColors: [Color] {
         TimeOfDayHelper.backgroundGradient(for: timeOfDay)
@@ -30,9 +27,10 @@ final class HourlyForecastViewModel: ObservableObject {
     }
 
 
-    init(forecastDay: ForecastDay, dayLabel: String) {
+    init(forecastDay: ForecastDay, dayLabel: String, timeOfDay: TimeOfDay) {
         self.dateString = forecastDay.date
         self.dayLabel = dayLabel
+        self.timeOfDay = timeOfDay
 
         if dayLabel == "Today" {
             let currentHour = Calendar.current.component(.hour, from: Date())

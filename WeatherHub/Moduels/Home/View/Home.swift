@@ -4,23 +4,11 @@ import SwiftUI
 struct Home: View {
     @State private var selectedTab = 0
     @StateObject private var locationManager = LocationManager()
+    @ObservedObject private var timeOfDayManager = TimeOfDayManager.shared
 
     init() {
-        let appearance = UITabBarAppearance()
-        appearance.configureWithDefaultBackground()
-        appearance.backgroundColor = UIColor(white: 0.08, alpha: 0.85)
-        appearance.backgroundEffect = UIBlurEffect(style: .systemChromeMaterialDark)
 
-        let normalColor = UIColor(white: 1.0, alpha: 0.5)
-        appearance.stackedLayoutAppearance.normal.iconColor = normalColor
-        appearance.stackedLayoutAppearance.normal.titleTextAttributes = [.foregroundColor: normalColor]
-
-        let selectedColor = UIColor.white
-        appearance.stackedLayoutAppearance.selected.iconColor = selectedColor
-        appearance.stackedLayoutAppearance.selected.titleTextAttributes = [.foregroundColor: selectedColor]
-
-        UITabBar.appearance().standardAppearance = appearance
-        UITabBar.appearance().scrollEdgeAppearance = appearance
+        TimeOfDayManager.shared.applyTabBarAppearance()
     }
 
     var body: some View {
@@ -42,9 +30,19 @@ struct Home: View {
                 }
                 .tag(1)
         }
-        .accentColor(.white)
+        .accentColor(timeOfDayManager.timeOfDay == .morning
+                      ? Color(red: 0.10, green: 0.25, blue: 0.55)
+                      : .white)
         .onAppear {
             locationManager.requestLocation()
+        }
+        .onChange(of: selectedTab) { newTab in
+            if newTab == 0 {
+                timeOfDayManager.resetToCurrentLocation()
+            }
+        }
+        .onChange(of: timeOfDayManager.timeOfDay) { _ in
+            timeOfDayManager.applyTabBarAppearance()
         }
     }
 
@@ -52,7 +50,7 @@ struct Home: View {
     @ViewBuilder
     private var currentLocationWeatherView: some View {
         if let query = locationManager.coordinateQuery {
-            WeatherDetailView(query: query)
+            WeatherDetailView(query: query, isCurrentLocation: true)
         } else if let error = locationManager.locationError {
             locationStatusView(
                 icon: "location.slash.fill",
@@ -73,7 +71,7 @@ struct Home: View {
     private func locationStatusView(icon: String, title: String, message: String, showSettingsButton: Bool) -> some View {
         ZStack {
             LinearGradient(
-                colors: TimeOfDayHelper.backgroundGradient(for: TimeOfDayHelper.current()),
+                colors: TimeOfDayHelper.backgroundGradient(for: timeOfDayManager.timeOfDay),
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )

@@ -32,6 +32,7 @@ enum NetworkError: LocalizedError {
 
 protocol WeatherNetworkServiceProtocol {
     func fetchWeather(query: String) -> AnyPublisher<WeatherResponse, NetworkError>
+    func searchCities(query: String) -> AnyPublisher<[SearchLocationResponse], NetworkError>
 }
 
 
@@ -73,6 +74,48 @@ final class NetworkService: WeatherNetworkServiceProtocol {
                 return data
             }
             .decode(type: WeatherResponse.self, decoder: JSONDecoder())
+            .mapError { error -> NetworkError in
+                if error is DecodingError {
+                    return NetworkError.decodingError(error)
+                }
+                if let urlError = error as? URLError {
+                    return NetworkError.network(urlError)
+                }
+                if let networkError = error as? NetworkError {
+                    return networkError
+                }
+                return NetworkError.unknown(error)
+            }
+            .eraseToAnyPublisher()
+    }
+
+    func searchCities(query: String) -> AnyPublisher<[SearchLocationResponse], NetworkError> {
+        guard var components = URLComponents(string: Constants.baseURL + Constants.searchEndpoint) else {
+            return Fail(error: NetworkError.invalidURL)
+                .eraseToAnyPublisher()
+        }
+
+        components.queryItems = [
+            URLQueryItem(name: "key", value: Constants.apiKey),
+            URLQueryItem(name: "q", value: query)
+        ]
+
+        guard let url = components.url else {
+            return Fail(error: NetworkError.invalidURL)
+                .eraseToAnyPublisher()
+        }
+
+        return session.dataTaskPublisher(for: url)
+            .tryMap { data, response in
+                guard let httpResponse = response as? HTTPURLResponse else {
+                    throw NetworkError.invalidResponse
+                }
+                guard (200...299).contains(httpResponse.statusCode) else {
+                    throw NetworkError.httpError(statusCode: httpResponse.statusCode)
+                }
+                return data
+            }
+            .decode(type: [SearchLocationResponse].self, decoder: JSONDecoder())
             .mapError { error -> NetworkError in
                 if error is DecodingError {
                     return NetworkError.decodingError(error)
